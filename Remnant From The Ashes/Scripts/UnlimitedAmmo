@@ -1,0 +1,64 @@
+{ Game   : Remnant-Win64-Shipping.exe
+  Version: 
+  Date   : 2023-03-09
+  Author : LoKy
+
+  Script munitions illimitées
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,Remnant-Win64-Shipping.exe,29 7B 54 48 8B CE) // should be unique
+alloc(newmem,$1000,INJECT)
+
+label(code)
+label(return)
+
+newmem:
+  mov edi,0
+code:
+  sub [rbx+54],edi
+  mov rcx,rsi
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db 29 7B 54 48 8B CE
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+73
+
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+53: 48 8B 53 10        - mov rdx,[rbx+10]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+57: 4C 8D 40 30        - lea r8,[rax+30]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+5B: 48 63 40 38        - movsxd  rax,dword ptr [rax+38]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+5F: 3B 42 38           - cmp eax,[rdx+38]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+62: 7F 0D              - jg Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+71
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+64: 48 8B C8           - mov rcx,rax
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+67: 48 8B 42 30        - mov rax,[rdx+30]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+6B: 4C 39 04 C8        - cmp [rax+rcx*8],r8
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+6F: 74 02              - je Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+73
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+71: 33 DB              - xor ebx,ebx
+// ---------- INJECTING HERE ----------
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+73: 29 7B 54           - sub [rbx+54],edi
+// ---------- DONE INJECTING  ----------
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+76: 48 8B CE           - mov rcx,rsi
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+79: 48 8B 06           - mov rax,[rsi]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+7C: F7 DF              - neg edi
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+7E: 8B D7              - mov edx,edi
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+80: FF 90 A8 07 00 00  - call qword ptr [rax+000007A8]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+86: 48 8B 5C 24 30     - mov rbx,[rsp+30]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+8B: 48 8B 74 24 38     - mov rsi,[rsp+38]
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+90: 48 83 C4 20        - add rsp,20
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+94: 5F                 - pop rdi
+Remnant-Win64-Shipping.ARangedWeapon::ConsumeAmmo+95: C3                 - ret 
+}
