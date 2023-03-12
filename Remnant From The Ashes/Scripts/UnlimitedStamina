@@ -1,0 +1,66 @@
+{ Game   : Remnant-Win64-Shipping.exe
+  Version: 
+  Date   : 2023-03-11
+  Author : LoKy
+
+  Stamina illimitée
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,Remnant-Win64-Shipping.exe,F3 0F 11 B3 40 01 00 00) // should be unique
+alloc(newmem,$1000,INJECT)
+alloc(stamina,4,INJECT)
+label(code)
+label(return)
+
+stamina:
+  dd (float)99999
+
+newmem:
+  movss xmm6,[stamina]
+code:
+  movss [rbx+00000140],xmm6
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop 3
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db F3 0F 11 B3 40 01 00 00
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+dealloc(stamina)
+{
+// ORIGINAL CODE - INJECTION POINT: Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+BE
+
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+9C: 0F 57 C0                 - xorps xmm0,xmm0
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+9F: 0F 28 C8                 - movaps xmm1,xmm0
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+A2: F3 0F 58 CF              - addss xmm1,xmm7
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+A6: 0F 2F CE                 - comiss xmm1,xmm6
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+A9: 72 08                    - jb Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+B3
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+AB: 0F 28 F1                 - movaps xmm6,xmm1
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+AE: F3 41 0F 5D F0           - minss xmm6,xmm8
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+B3: 0F 2E F0                 - ucomiss xmm6,xmm0
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+B6: 44 0F 28 44 24 20        - movaps xmm8,[rsp+20]
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+BC: 74 1A                    - je Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+D8
+// ---------- INJECTING HERE ----------
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+BE: F3 0F 11 B3 40 01 00 00  - movss [rbx+00000140],xmm6
+// ---------- DONE INJECTING  ----------
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+C6: B0 01                    - mov al,01
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+C8: 0F 28 74 24 40           - movaps xmm6,[rsp+40]
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+CD: 0F 28 7C 24 30           - movaps xmm7,[rsp+30]
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+D2: 48 83 C4 50              - add rsp,50
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+D6: 5B                       - pop rbx
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+D7: C3                       - ret 
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+D8: 0F 28 74 24 40           - movaps xmm6,[rsp+40]
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+DD: 32 C0                    - xor al,al
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+DF: 0F 28 7C 24 30           - movaps xmm7,[rsp+30]
+Remnant-Win64-Shipping.UVitalityComponent::ApplyDeltaInternal+E4: 48 83 C4 50              - add rsp,50
+}
