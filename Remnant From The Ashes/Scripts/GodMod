@@ -1,0 +1,71 @@
+{ Game   : Remnant-Win64-Shipping.exe
+  Version: 
+  Date   : 2023-03-11
+  Author : LoKy
+
+  GodMod seulement pour les joueurs, les PNJ sont vulnérables ! Le code se trouve dans la section "newmem" et "heal"
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,Remnant-Win64-Shipping.exe,F3 0F 11 B3 70 08 00 00) // should be unique
+alloc(newmem,$1000,INJECT)
+alloc(heal,4,INJECT)
+label(code)
+label(return)
+
+heal:
+  dd (float)99999
+
+
+newmem:
+  cmp [rbx+3D0],1
+  jne code
+  movss xmm6,[heal]
+  movss [rbx+00000870],xmm6
+  jmp return
+code:
+  movss [rbx+00000870],xmm6
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop 3
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db F3 0F 11 B3 70 08 00 00
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+dealloc(heal)
+{
+// ORIGINAL CODE - INJECTION POINT: Remnant-Win64-Shipping.exe+7046C7
+
+Remnant-Win64-Shipping.exe+7046A5: 0F 28 F1                 - movaps xmm6,xmm1
+Remnant-Win64-Shipping.exe+7046A8: 48 8B 01                 - mov rax,[rcx]
+Remnant-Win64-Shipping.exe+7046AB: FF 50 38                 - call qword ptr [rax+38]
+Remnant-Win64-Shipping.exe+7046AE: 0F 57 C9                 - xorps xmm1,xmm1
+Remnant-Win64-Shipping.exe+7046B1: 0F 2F C1                 - comiss xmm0,xmm1
+Remnant-Win64-Shipping.exe+7046B4: 76 0E                    - jna Remnant-Win64-Shipping.exe+7046C4
+Remnant-Win64-Shipping.exe+7046B6: F3 0F 59 35 46 56 E7 01  - mulss xmm6,[Remnant-Win64-Shipping.exe+2579D04]
+Remnant-Win64-Shipping.exe+7046BE: F3 0F 5E F0              - divss xmm6,xmm0
+Remnant-Win64-Shipping.exe+7046C2: EB 03                    - jmp Remnant-Win64-Shipping.exe+7046C7
+Remnant-Win64-Shipping.exe+7046C4: 0F 57 F6                 - xorps xmm6,xmm6
+// ---------- INJECTING HERE ----------
+Remnant-Win64-Shipping.exe+7046C7: F3 0F 11 B3 70 08 00 00  - movss [rbx+00000870],xmm6
+// ---------- DONE INJECTING  ----------
+Remnant-Win64-Shipping.exe+7046CF: 48 8D 8B E8 08 00 00     - lea rcx,[rbx+000008E8]
+Remnant-Win64-Shipping.exe+7046D6: 48 8D 54 24 40           - lea rdx,[rsp+40]
+Remnant-Win64-Shipping.exe+7046DB: 48 89 5C 24 40           - mov [rsp+40],rbx
+Remnant-Win64-Shipping.exe+7046E0: E8 3B B9 BC FF           - call Remnant-Win64-Shipping.exe+2D0020
+Remnant-Win64-Shipping.exe+7046E5: 0F 28 74 24 20           - movaps xmm6,[rsp+20]
+Remnant-Win64-Shipping.exe+7046EA: 48 83 C4 30              - add rsp,30
+Remnant-Win64-Shipping.exe+7046EE: 5B                       - pop rbx
+Remnant-Win64-Shipping.exe+7046EF: C3                       - ret 
+Remnant-Win64-Shipping.ADamageableActor::SetHealth: 40 53                    - push rbx
+Remnant-Win64-Shipping.ADamageableActor::SetHealth+2: 48 83 EC 30              - sub rsp,30
+}
