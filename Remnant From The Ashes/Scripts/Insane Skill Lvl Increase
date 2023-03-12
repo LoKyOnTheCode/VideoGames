@@ -1,0 +1,64 @@
+{ Game   : Remnant-Win64-Shipping.exe
+  Version: 
+  Date   : 2023-03-11
+  Author : LoKy
+
+  Script qui ne tiens pas compte du level cap de compétence (lvl. 20) du jeu, une amélioration suffit pour attendre plusieurs millions !
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,Remnant-Win64-Shipping.exe,41 89 2E 49 8B D6) // should be unique
+alloc(newmem,$1000,INJECT)
+
+label(code)
+label(return)
+
+newmem:
+  mov ebp,9999999
+code:
+  mov [r14],ebp
+  mov rdx,r14
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db 41 89 2E 49 8B D6
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: Remnant-Win64-Shipping.exe+7B21BB
+
+Remnant-Win64-Shipping.exe+7B2196: 48 39 14 C8           - cmp [rax+rcx*8],rdx
+Remnant-Win64-Shipping.exe+7B219A: 75 03                 - jne Remnant-Win64-Shipping.exe+7B219F
+Remnant-Win64-Shipping.exe+7B219C: 48 8B FB              - mov rdi,rbx
+Remnant-Win64-Shipping.exe+7B219F: 48 8B CF              - mov rcx,rdi
+Remnant-Win64-Shipping.exe+7B21A2: E8 B9 A3 DD FF        - call Remnant-Win64-Shipping.UClass::GetDefaultObject<UAIPOIType>
+Remnant-Win64-Shipping.exe+7B21A7: 8B A8 C0 00 00 00     - mov ebp,[rax+000000C0]
+Remnant-Win64-Shipping.exe+7B21AD: 41 8B 3E              - mov edi,[r14]
+Remnant-Win64-Shipping.exe+7B21B0: 3B EF                 - cmp ebp,edi
+Remnant-Win64-Shipping.exe+7B21B2: 0F 84 16 01 00 00     - je Remnant-Win64-Shipping.exe+7B22CE
+Remnant-Win64-Shipping.exe+7B21B8: 45 33 C0              - xor r8d,r8d
+// ---------- INJECTING HERE ----------
+Remnant-Win64-Shipping.exe+7B21BB: 41 89 2E              - mov [r14],ebp
+// ---------- DONE INJECTING  ----------
+Remnant-Win64-Shipping.exe+7B21BE: 49 8B D6              - mov rdx,r14
+Remnant-Win64-Shipping.exe+7B21C1: 48 8B CE              - mov rcx,rsi
+Remnant-Win64-Shipping.exe+7B21C4: E8 77 58 01 00        - call Remnant-Win64-Shipping.UTraitsComponent::InitializeTrait
+Remnant-Win64-Shipping.exe+7B21C9: 49 8B 46 08           - mov rax,[r14+08]
+Remnant-Win64-Shipping.exe+7B21CD: 48 8D 8E 70 01 00 00  - lea rcx,[rsi+00000170]
+Remnant-Win64-Shipping.exe+7B21D4: 48 8D 54 24 20        - lea rdx,[rsp+20]
+Remnant-Win64-Shipping.exe+7B21D9: 48 89 44 24 20        - mov [rsp+20],rax
+Remnant-Win64-Shipping.exe+7B21DE: 89 7C 24 28           - mov [rsp+28],edi
+Remnant-Win64-Shipping.exe+7B21E2: E8 39 DE B1 FF        - call Remnant-Win64-Shipping.exe+2D0020
+Remnant-Win64-Shipping.exe+7B21E7: B0 01                 - mov al,01
+}
