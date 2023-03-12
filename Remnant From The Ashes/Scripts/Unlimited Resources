@@ -1,0 +1,64 @@
+{ Game   : Remnant-Win64-Shipping.exe
+  Version: 
+  Date   : 2023-03-09
+  Author : LoKy
+
+  Script de consommables illimités (ATTENTION) il faut faire attention lors de son utilisation.
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,Remnant-Win64-Shipping.exe,89 50 2C 48 8B 89 68 05 00 00) // should be unique
+alloc(newmem,$1000,INJECT)
+
+label(code)
+label(return)
+
+newmem:
+  mov [rax+2C],9999
+code:
+  //mov [rax+2C],edx
+  mov rcx,[rcx+00000568]
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop 5
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db 89 50 2C 48 8B 89 68 05 00 00
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: Remnant-Win64-Shipping.AEquipment::SetQuantity+10
+
+Remnant-Win64-Shipping.exe+7A02FA: CC                    - int 3 
+Remnant-Win64-Shipping.exe+7A02FB: CC                    - int 3 
+Remnant-Win64-Shipping.exe+7A02FC: CC                    - int 3 
+Remnant-Win64-Shipping.exe+7A02FD: CC                    - int 3 
+Remnant-Win64-Shipping.exe+7A02FE: CC                    - int 3 
+Remnant-Win64-Shipping.exe+7A02FF: CC                    - int 3 
+Remnant-Win64-Shipping.AEquipment::SetQuantity: 48 83 EC 28           - sub rsp,28
+Remnant-Win64-Shipping.AEquipment::SetQuantity+4: 48 8B 81 50 03 00 00  - mov rax,[rcx+00000350]
+Remnant-Win64-Shipping.AEquipment::SetQuantity+B: 48 85 C0              - test rax,rax
+Remnant-Win64-Shipping.AEquipment::SetQuantity+E: 74 03                 - je Remnant-Win64-Shipping.AEquipment::SetQuantity+13
+// ---------- INJECTING HERE ----------
+Remnant-Win64-Shipping.AEquipment::SetQuantity+10: 89 50 2C              - mov [rax+2C],edx
+// ---------- DONE INJECTING  ----------
+Remnant-Win64-Shipping.AEquipment::SetQuantity+13: 48 8B 89 68 05 00 00  - mov rcx,[rcx+00000568]
+Remnant-Win64-Shipping.AEquipment::SetQuantity+1A: 48 85 C9              - test rcx,rcx
+Remnant-Win64-Shipping.AEquipment::SetQuantity+1D: 74 64                 - je Remnant-Win64-Shipping.AEquipment::SetQuantity+83
+Remnant-Win64-Shipping.AEquipment::SetQuantity+1F: 48 89 5C 24 20        - mov [rsp+20],rbx
+Remnant-Win64-Shipping.AEquipment::SetQuantity+24: E8 B7 45 F5 FF        - call Remnant-Win64-Shipping.ACharacterGunfire::GetCharacterInventory
+Remnant-Win64-Shipping.AEquipment::SetQuantity+29: 48 8B D8              - mov rbx,rax
+Remnant-Win64-Shipping.AEquipment::SetQuantity+2C: 48 85 C0              - test rax,rax
+Remnant-Win64-Shipping.AEquipment::SetQuantity+2F: 74 4D                 - je Remnant-Win64-Shipping.AEquipment::SetQuantity+7E
+Remnant-Win64-Shipping.AEquipment::SetQuantity+31: 48 8B 88 E8 00 00 00  - mov rcx,[rax+000000E8]
+Remnant-Win64-Shipping.AEquipment::SetQuantity+38: 48 85 C9              - test rcx,rcx
+}
